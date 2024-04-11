@@ -111,7 +111,7 @@
 .header_search>p>a:hover{
 	color: rgb(93, 5, 5);
 }
-/*头部的购物车标记区域*/
+/*头部的收藏夹标记区域*/
 .header_container>.shopping_bag{
 	position: absolute;
 	margin-top: 55px;

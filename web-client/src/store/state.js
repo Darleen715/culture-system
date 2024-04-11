@@ -13,7 +13,7 @@ export default {
   goodsComment: [],
   // 用户数据
   userInfo: {},
-  // 购物车数据
+  // 收藏夹数据
   cartgoods: [],
   // 搜索结果
   searchresults: []

@@ -39,20 +39,23 @@ export default {
             // 使用您的API方法获取文章信息
             getArticles()
                 .then(response => {
-                    console.log(response.message);
                     // 成功获取文章信息后将其存储到组件的articles数组中
                     this.articles = response.message.map(article => {
-                        // article.likes = 0; // 添加likes字段并初始化为0
-                        article.liked = false; // 添加liked字段并初始化为false
+                        // 添加likes字段并初始化为0
+                        article.likes = article.likes || 0;
+                        // 添加liked字段并初始化为false
+                        article.liked = false;
                         return article;
                     });
+
+                    // 根据likes属性对文章列表进行排序，降序排列
+                    this.articles.sort((a, b) => b.likes - a.likes);
                 })
                 .catch(error => {
                     console.error('获取文章信息时出错：', error);
                 });
         },
         async toggleLike(article_id, likes, index) {
-            console.log(article_id);
             try {
                 // 检查本地存储是否存在点赞记录
                 const likedArticles = JSON.parse(localStorage.getItem('likedArticles')) || [];
@@ -65,11 +68,7 @@ export default {
                     });
                     return;
                 }
-
-                // 发送请求更新likes数
-                console.log(article_id);// 输出为2
                 const result = await addArticleLikes(article_id, likes + 1);
-                console.log(result);
                 if (result.success_code === 200) {
                     this.$message({
                         type: 'success',
@@ -115,12 +114,14 @@ export default {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+    align-items: flex-start;
 }
 
 .article-item {
     margin-bottom: 20px;
     width: 27%;
-    height: 400px;
+    height: 100%;
+    min-height: 400px;
     margin: 2.5%;
     max-width: 600px;
 }

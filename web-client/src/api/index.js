@@ -54,7 +54,7 @@ export const changeUserPwd = (id, oriPwd, newPwd) => ajax(BASE_URL + '/api/chang
 // 修改用户手机
 export const changeUserPhone = (id, phone, code) => ajax(BASE_URL + '/api/change_user_phone', { id, phone, code }, 'POST');
 
-// 加入购物车
+// 加入收藏夹
 export const addGoodsToCart = (user_id, goods_id, goods_name, thumb_url, price, buy_count, counts) => ajax(BASE_URL + '/api/add_shop_cart', { user_id, goods_id, goods_name, thumb_url, price, buy_count, counts }, 'POST');
 
 // 单个商品数量的改变
@@ -75,7 +75,7 @@ export const deleteRecomGoods = (goods_id) => ajax(BASE_URL + '/api/delete_recom
 // 修改recommend单个商品
 export const changeGoodsInfo = (params) => ajax(BASE_URL + '/api/update_recom_goods', params, 'POST');
 
-// 请求购物车的数据
+// 请求收藏夹的数据
 export const getCartsGoods = (params) => ajax(BASE_URL + '/api/cart_goods', params);
 
 // 关键词搜索

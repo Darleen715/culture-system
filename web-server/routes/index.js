@@ -334,8 +334,9 @@ router.post('/api/login_pwd', (req, res) => {
 
     // 验证图形验证码是否正确
     if (captcha !== tmp_captcha) {
-        res.json({ err_code: 0, message: '图形验证码不正确!' });
-        return;
+        console.log('error!');
+        res.json({ err_code: 0, message: '验证码不正确!' });
+        return ;
     }
 
     tmp_captcha = '';
@@ -347,7 +348,7 @@ router.post('/api/login_pwd', (req, res) => {
             res.json({ err_code: 0, message: '用户名不正确!' });
         } else {
             results = JSON.parse(JSON.stringify(results));
-
+            console.log(results[0]);
             if (results[0]) {  // 用户已经存在
                 // 验证密码是否正确
                 if (results[0].user_pwd !== user_pwd) {
@@ -453,7 +454,7 @@ router.get('/api/logout', (req, res) => {
 });
 
 /**
- * 添加商品到购物车
+ * 添加商品到收藏夹
  */
 router.post('/api/add_shop_cart', (req, res) => {
     // 验证用户
@@ -490,10 +491,10 @@ router.post('/api/add_shop_cart', (req, res) => {
                 let sql_params = [goods_id, goods_name, thumb_url, price, buy_count, is_pay, user_id, counts];
                 conn.query(add_sql, sql_params, (error, results, fields) => {
                     if (error) {
-                        res.json({ err_code: 0, message: '加入购物车失败!' });
+                        res.json({ err_code: 0, message: '加入收藏夹失败!' });
                         console.log(error);
                     } else {
-                        res.json({ success_code: 200, message: '加入购物车成功!' });
+                        res.json({ success_code: 200, message: '加入收藏夹成功!' });
                     }
                 });
             }
@@ -503,7 +504,7 @@ router.post('/api/add_shop_cart', (req, res) => {
 });
 
 /**
- * 查询购物车的商品
+ * 查询收藏夹的商品
  */
 router.get('/api/cart_goods', (req, res) => {
     // 获取参数
@@ -512,7 +513,7 @@ router.get('/api/cart_goods', (req, res) => {
     conn.query(sqlStr, (error, results, fields) => {
         if (error) {
             console.log(error);
-            res.json({ err_code: 0, message: '请求购物车商品数据失败' });
+            res.json({ err_code: 0, message: '请求收藏夹商品数据失败' });
         } else {
             res.json({ success_code: 200, message: results });
         }
@@ -520,7 +521,7 @@ router.get('/api/cart_goods', (req, res) => {
 });
 
 /**
- * 删除购物车单条商品
+ * 删除收藏夹单条商品
  */
 router.post('/api/delete_goods', (req, res) => {
     // 获取数据
@@ -984,7 +985,7 @@ router.post('/api/delete_article', (req, res) => {
 
 /*
 删除单个用户
-*/ 
+*/
 router.post('/api/delete_user', (req, res) => {
     // 获取数据
     const user_id = req.body.id;

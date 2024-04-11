@@ -5,7 +5,7 @@
       <!--面板头部-->
       <div class="login-header">
         <div class="login-logo">
-          <img src="./images/log.png" alt="" width="150">
+          管理员登录
         </div>
       </div>
       <!--面板表单部分-->
@@ -20,10 +20,10 @@
               <input type="password" maxlength="18" placeholder="密码" v-if="pwdMode" v-model="pwd">
               <input type="text" maxlength="18" placeholder="密码" v-else v-model="pwd">
               <div class="switch-show">
-                <img @click.prevent="dealPwdMode(false)" :class="{on: pwdMode}" src="./images/hide_pwd.png" alt=""
-                       width="20">
-                <img @click.prevent="dealPwdMode(true)" :class="{on: !pwdMode}" src="./images/show_pwd.png" alt=""
-                       width="20">
+                <img @click.prevent="dealPwdMode(false)" :class="{ on: pwdMode }" src="./images/hide_pwd.png" alt=""
+                  width="20">
+                <img @click.prevent="dealPwdMode(true)" :class="{ on: !pwdMode }" src="./images/show_pwd.png" alt=""
+                  width="20">
               </div>
             </section>
           </div>
@@ -36,63 +36,63 @@
 </template>
 
 <script>
-  import { MessageBox } from 'element-ui'
-  import { adminLogin } from '../../api/index'
+import { MessageBox } from 'element-ui'
+import { adminLogin } from '../../api/index'
 
-  export default {
-    name: "Login",
-    data() {
-      return {
-        pwdMode: true, // 密码的显示方式 true 密文 false 明文
-        pwd: '', // 密码
-        user_name: '', // 用户名
-        adminInfo: {},
-      }
+export default {
+  name: "Login",
+  data() {
+    return {
+      pwdMode: true, // 密码的显示方式 true 密文 false 明文
+      pwd: '', // 密码
+      user_name: '', // 用户名
+      adminInfo: {},
+    }
+  },
+  methods: {
+    // 密码的显示方式
+    dealPwdMode(flag) {
+      this.pwdMode = flag;
     },
-    methods: {
-      // 密码的显示方式
-      dealPwdMode(flag) {
-        this.pwdMode = flag;
-      },
-      // 登录
-      async login() {
-        // 前端校验
-        if (!this.user_name) {
-		      MessageBox({
-            type: 'info',
-            message: "请输入用户名",
-			      showClose: true,
-          });
-          return;
-        } else if (!this.pwd) {
-	        MessageBox({
-            type: 'info',
-            message: "请输入密码!",
-		        showClose: true,
-          });
-          return;
-        }
-        let result = await adminLogin(this.user_name, this.pwd);
-        if(result.success_code === 200){
-          MessageBox({
-              type: 'success',
-              message: result.message,
-			        showClose: true,
-          });
-          this.adminInfo.user_name = this.user_name;
-          this.$router.replace('/admin');
-          window.localStorage.setItem("adminInfo",JSON.stringify(this.adminInfo));
-          window.localStorage.removeItem("userInfo");
-        }else{
-          MessageBox({
-              type: 'error',
-              message: result.message,
-			        showClose: true,
-          });
-        }
+    // 登录
+    async login() {
+      // 前端校验
+      if (!this.user_name) {
+        MessageBox({
+          type: 'info',
+          message: "请输入用户名",
+          showClose: true,
+        });
+        return;
+      } else if (!this.pwd) {
+        MessageBox({
+          type: 'info',
+          message: "请输入密码!",
+          showClose: true,
+        });
+        return;
+      }
+      let result = await adminLogin(this.user_name, this.pwd);
+      if (result.success_code === 200) {
+        MessageBox({
+          type: 'success',
+          message: result.message,
+          showClose: true,
+        });
+        this.adminInfo.user_name = this.user_name;
+        this.$router.replace('/admin');
+        window.localStorage.setItem("adminInfo", JSON.stringify(this.adminInfo));
+        window.localStorage.removeItem("userInfo");
+      } else {
+        MessageBox({
+          type: 'error',
+          message: result.message,
+          showClose: true,
+        });
       }
     }
   }
+}
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

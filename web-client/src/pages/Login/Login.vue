@@ -5,34 +5,27 @@
       <!--面板头部-->
       <div class="login-header">
         <div class="login-logo">
-          <img src="./images/logo-round.jpg" alt="" width="150">
+          用户登录
         </div>
         <!--面板标题-->
         <div class="login-header-title">
-          <a href="javascript:;" :class="{current: loginMode}" @click="dealLoginMode(true)">验证码登录</a>
-          <a href="javascript:;" :class="{current: !loginMode}" @click="dealLoginMode(false)">密码登录</a>
+          <a href="javascript:;" :class="{ current: loginMode }" @click="dealLoginMode(true)">验证码登录</a>
+          <a href="javascript:;" :class="{ current: !loginMode }" @click="dealLoginMode(false)">密码登录</a>
         </div>
       </div>
       <!--面板表单部分-->
       <div class="login-content">
         <form>
           <!--手机验证码登录部分-->
-          <div :class="{current: loginMode}">
+          <div :class="{ current: loginMode }">
             <section class="login-message">
               <input type="tel" maxlength="11" placeholder="手机号" v-model="phone">
-              <button
-                v-if="!countDown"
-                class="get-verification"
-                :class="{phone_right: phoneRight}"
-                @click.prevent="getVerifyCode()"
-              >
+              <button v-if="!countDown" class="get-verification" :class="{ phone_right: phoneRight }"
+                @click.prevent="getVerifyCode()">
                 获取验证码
               </button>
-              <button
-                v-else
-                disabled="disabled"
-                class="get-verification">
-                已发送({{countDown}}s)
+              <button v-else disabled="disabled" class="get-verification">
+                已发送({{ countDown }}s)
               </button>
             </section>
             <section class="login-verification">
@@ -44,7 +37,7 @@
             </section>
           </div>
           <!--账号登录部分-->
-          <div :class="{current: !loginMode}">
+          <div :class="{ current: !loginMode }">
             <section>
               <section class="login-message">
                 <input type="text" maxlength="11" placeholder="账号" v-model="user_name">
@@ -53,21 +46,16 @@
                 <input type="password" maxlength="18" placeholder="密码" v-if="pwdMode" v-model="pwd">
                 <input type="text" maxlength="18" placeholder="密码" v-else v-model="pwd">
                 <div class="switch-show">
-                  <img @click.prevent="dealPwdMode(false)" :class="{on: pwdMode}" src="./images/hide_pwd.png" alt=""
-                       width="20">
-                  <img @click.prevent="dealPwdMode(true)" :class="{on: !pwdMode}" src="./images/show_pwd.png" alt=""
-                       width="20">
+                  <img @click.prevent="dealPwdMode(false)" :class="{ on: pwdMode }" src="./images/hide_pwd.png" alt=""
+                    width="20">
+                  <img @click.prevent="dealPwdMode(true)" :class="{ on: !pwdMode }" src="./images/show_pwd.png" alt=""
+                    width="20">
                 </div>
               </section>
               <section class="login-message">
                 <input type="text" maxlength="11" placeholder="验证码" v-model="captcha">
-                <img
-                  ref="captcha"
-                  class="get-verification"
-                  src="http://localhost:3000/api/captcha"
-                  alt="captcha"
-                  @click.prevent="getCaptcha()"
-                >
+                <img ref="captcha" class="get-verification" src="http://localhost:3000/api/captcha" alt="captcha"
+                  @click.prevent="getCaptcha()">
               </section>
               <section class="login-hint">
                 温馨提示：未注册帐号的用户账号，登录时将自动注册，且代表已同意
@@ -84,204 +72,201 @@
 </template>
 
 <script>
-  import {getPhoneCode, phoneCodeLogin, pwdLogin} from './../../api/index';
-  import { MessageBox } from 'element-ui';
-  import {mapActions} from 'vuex'
+import { getPhoneCode, phoneCodeLogin, pwdLogin } from './../../api/index';
+import { MessageBox } from 'element-ui';
+import { mapActions } from 'vuex'
 
-  export default {
-    name: "Login",
-    data() {
-      return {
-        loginMode: true, // 登录方式, true 验证码登录 false 账号登录
-        phone: '', // 手机号码
-        countDown: 0, // 倒计时
-        pwdMode: true, // 密码的显示方式 true 密文 false 明文
-        pwd: '', // 密码
-        code: '', // 验证码
-        userInfo: {}, // 用户的信息
-        user_name: '', // 用户名
-        captcha: '',  // 图形验证码
+export default {
+  name: "Login",
+  data() {
+    return {
+      loginMode: true, // 登录方式, true 验证码登录 false 账号登录
+      phone: '', // 手机号码
+      countDown: 0, // 倒计时
+      pwdMode: true, // 密码的显示方式 true 密文 false 明文
+      pwd: '', // 密码
+      code: '', // 验证码
+      userInfo: {}, // 用户的信息
+      user_name: '', // 用户名
+      captcha: '',  // 图形验证码
+    }
+  },
+  computed: {
+    // 验证手机号是否合理
+    phoneRight() {
+      return /^[1][3,4,5,7,8][0-9]{9}$/.test(this.phone)
+    }
+  },
+  methods: {
+    ...mapActions(['syncUserInfo']),
+    // 1. 登录的模式
+    dealLoginMode(flag) {
+      this.loginMode = flag;
+    },
+    // 2. 获取短信验证码
+    async getVerifyCode() {
+      // 2.1 开启倒计时
+      if (this.phoneRight) {
+        this.countDown = 60;
+        this.intervalId = setInterval(() => {
+          this.countDown--;
+          // 判断
+          if (this.countDown === 0) {
+            clearInterval(this.intervalId);
+          }
+        }, 1000);
+      }
+      // 2.2 获取短信验证码
+      let result = await getPhoneCode(this.phone);
+      console.log(result);
+      // 2.3 获取验证码失败
+      if (result.err_code === 0) {
+        // 提示信息
+        MessageBox({
+          type: 'info',
+          message: result.message,
+          showClose: true,
+        });
+      } else if (result.success_code === 200) {
+        MessageBox({
+          type: 'info',
+          message: `验证码为:${result.message}`,
+          showClose: true,
+        });
       }
     },
-    computed: {
-      // 验证手机号是否合理
-      phoneRight() {
-        return /^[1][3,4,5,7,8][0-9]{9}$/.test(this.phone)
-      }
+    // 3. 密码的显示方式
+    dealPwdMode(flag) {
+      this.pwdMode = flag;
     },
-    methods: {
-      ...mapActions(['syncUserInfo']),
-      // 1. 登录的模式
-      dealLoginMode(flag) {
-        this.loginMode = flag;
-      },
-      // 2. 获取短信验证码
-      async getVerifyCode() {
-        // 2.1 开启倒计时
-        if (this.phoneRight) {
-          this.countDown = 60;
-          this.intervalId = setInterval(() => {
-            this.countDown--;
-            // 判断
-            if (this.countDown === 0) {
-              clearInterval(this.intervalId);
-            }
-          }, 1000);
-        }
-
-        // 2.2 获取短信验证码
-        let result = await getPhoneCode(this.phone);
-        console.log(result);
-
-        // 2.3 获取验证码失败
-        if (result.err_code === 0) {
-          // 提示信息
-		      MessageBox({
-              type: 'info',
-              message: result.message,
-			        showClose: true,
-          });
-
-          // 其他处理
-          /*
-          clearInterval(this.intervalId);
-          this.countDown = 0;
-          */
-        }else if(result.success_code === 200){
-			    MessageBox({
-              type: 'info',
-              message: `验证码为:${result.message}, 短信功能暂未开通,十分抱歉对您产生的不便`,
-			        showClose: true,
-          });
-		    }
-      },
-      // 3. 密码的显示方式
-      dealPwdMode(flag) {
-        this.pwdMode = flag;
-      },
-      // 4. 获取图形验证码
-      getCaptcha() {
-        this.$refs.captcha.src = 'http://localhost:3000/api/captcha?time=' + new Date();
-      },
-      // 5. 登录
-      async login() {
-        // 5.1 登录模式
-        if (this.loginMode) { // 验证码登录
-          // 5.2 前台校验
-          if (!this.phone) {
-		        MessageBox({
-              type: 'info',
-              message: "请输入手机号码!",
-			        showClose: true,
-            });
-            return;
-          } else if (!this.phoneRight) {
-		        MessageBox({
-              type: 'info',
-              message: "请输入正确手机号码!",
-			        showClose: true,
-            });
-            return;
-          }
-
-          if (!this.code) {
-		      	MessageBox({
-              type: 'info',
-              message: "请输入验证码!",
-			        showClose: true,
-            });
-            return;
-          } else if (!(/^\d{6}$/gi.test(this.code))) {
-		         MessageBox({
-              type: 'info',
-              message: "请输入正确的验证码!",
-			        showClose: true,
-            });
-            return;
-          }
-          // 5.3 手机验证码登录
-          const result = await phoneCodeLogin(this.phone, this.code);
-          if (result.success_code === 200) {
-            this.userInfo = result.message;
-			      this.phone = ''; // 手机号码
-            this.countDown = 0; // 倒计时
-			      clearInterval(this.intervalId);
-            this.code = ''; // 验证码
-			      this.pwd = ''; // 密码
-            this.user_name = ''; // 用户名
-            this.captcha = '';  // 图形验证码
-          } else {
-            this.userInfo = {
-              message: '登录失败, 手机号或验证码不正确!'
-            };
-          }
-        } else { // 账号和密码登录
-          // 5.4 前端校验
-          if (!this.user_name) {
-		        MessageBox({
-              type: 'info',
-              message: "请输入账号!",
-			        showClose: true,
-            });
-            return;
-          } else if (!this.pwd) {
-		        MessageBox({
-              type: 'info',
-              message: "请输入密码!",
-			        showClose: true,
-            });
-            return;
-          }else if (!this.captcha) {
-		        MessageBox({
-              type: 'info',
-              message: "请输入验证码!",
-			        showClose: true,
-            });
-            return;
-          }
-          // 5.5 用户名和密码的登录
-          const result = await pwdLogin(this.user_name, this.pwd, this.captcha);
-          if (result.success_code === 200) {
-            this.userInfo = result.message;
-			      this.phone = ''; // 手机号码
-            this.countDown = 0; // 倒计时
-			      clearInterval(this.intervalId);
-            this.code = ''; // 验证码
-			      this.pwd = ''; // 密码
-            this.user_name = ''; // 账号
-            this.captcha = '';  // 图形验证码
-          } else {
-            MessageBox({
-              type: 'info',
-              message: '登录失败, 账号或密码或验证码不正确!',
-			        showClose: true,
-            });
-          }
-        }
-
-        // 6. 后续处理
-        if (!this.userInfo.id) { // 失败
-		        MessageBox({
-              type: 'info',
-              message: this.userInfo.message,
-			        showClose: true,
-            });
-        } else { // 成功
-          // 6.1 同步用户数据
-          this.syncUserInfo(this.userInfo);
-          // 6.2 回到主界面
+    // 4. 获取图形验证码
+    getCaptcha() {
+      this.$refs.captcha.src = 'http://localhost:3000/api/captcha?time=' + new Date();
+    },
+    // 5. 登录
+    async login() {
+      // 5.1 登录模式
+      if (this.loginMode) { // 验证码登录
+        // 5.2 前台校验
+        if (!this.phone) {
           MessageBox({
-            type: 'success',
-            message: '登录成功!',
-			      showClose: true,
+            type: 'info',
+            message: "请输入手机号码!",
+            showClose: true,
           });
-          this.$router.back();
-          window.localStorage.setItem("userInfo",JSON.stringify(this.userInfo));
-          window.localStorage.removeItem("adminInfo");
+          return;
+        } else if (!this.phoneRight) {
+          MessageBox({
+            type: 'info',
+            message: "请输入正确手机号码!",
+            showClose: true,
+          });
+          return;
         }
+
+        if (!this.code) {
+          MessageBox({
+            type: 'info',
+            message: "请输入验证码!",
+            showClose: true,
+          });
+          return;
+        } else if (!(/^\d{6}$/gi.test(this.code))) {
+          MessageBox({
+            type: 'info',
+            message: "请输入正确的验证码!",
+            showClose: true,
+          });
+          return;
+        }
+        // 5.3 手机验证码登录
+        const result = await phoneCodeLogin(this.phone, this.code);
+        if (result.success_code === 200) {
+          this.userInfo = result.message;
+          this.phone = ''; // 手机号码
+          this.countDown = 0; // 倒计时
+          clearInterval(this.intervalId);
+          this.code = ''; // 验证码
+          this.pwd = ''; // 密码
+          this.user_name = ''; // 用户名
+          this.captcha = '';  // 图形验证码
+        } else {
+          this.userInfo = {
+            message: '登录失败, 手机号或验证码不正确!'
+          };
+        }
+      } else { // 账号和密码登录
+        // 5.4 前端校验
+        if (!this.user_name) {
+          MessageBox({
+            type: 'info',
+            message: "请输入账号!",
+            showClose: true,
+          });
+          return;
+        } else if (!this.pwd) {
+          MessageBox({
+            type: 'info',
+            message: "请输入密码!",
+            showClose: true,
+          });
+          return;
+        } else if (!this.captcha) {
+          MessageBox({
+            type: 'info',
+            message: "请输入验证码!",
+            showClose: true,
+          });
+          return;
+        }
+        // 5.5 用户名和密码的登录
+        console.log(this.user_name, this.pwd, this.captcha);
+        const result = await pwdLogin(this.user_name, this.pwd, this.captcha);
+        if (result.success_code === 200) {
+          console.log('success');
+          this.userInfo = result.message;
+          this.phone = ''; // 手机号码
+          this.countDown = 0; // 倒计时
+          clearInterval(this.intervalId);
+          this.code = ''; // 验证码
+          this.pwd = ''; // 密码
+          this.user_name = ''; // 账号
+          this.captcha = '';  // 图形验证码
+          return;
+        } else {
+          MessageBox({
+            type: 'info',
+            message: `${result.message}`,
+            showClose: true,
+
+          });
+          return;
+        }
+      }
+
+      // 6. 后续处理
+      if (!this.userInfo.id) { // 失败
+        MessageBox({
+          type: 'info',
+          message: this.userInfo.message,
+          showClose: true,
+        });
+      } else { // 成功
+        // 6.1 同步用户数据
+        this.syncUserInfo(this.userInfo);
+        // 6.2 回到主界面
+        MessageBox({
+          type: 'success',
+          message: '登录成功!',
+          showClose: true,
+        });
+        this.$router.back();
+        window.localStorage.setItem("userInfo", JSON.stringify(this.userInfo));
+        window.localStorage.removeItem("adminInfo");
       }
     }
   }
+}
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">

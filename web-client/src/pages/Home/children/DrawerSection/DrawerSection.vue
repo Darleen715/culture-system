@@ -1,5 +1,5 @@
 <template>
-  <!--首页右侧微型购物车区域-->
+  <!--首页右侧微型收藏夹区域-->
   <div id="meg">
     <button id="scrollToTopBtn" title="Go to top">↑</button>
     <div class="meg_nav" @click="drawer = true">
@@ -12,7 +12,7 @@
         <img src="../../img/meg_top.png" />
       </a>
     </div>
-    <el-drawer title="购物车" :visible.sync="drawer" :direction="direction">
+    <el-drawer title="收藏夹" :visible.sync="drawer" :direction="direction">
       <div class="meg_show">
         <div class="toolbar_header">
           <!-- <div class="pro_Chk">
@@ -106,7 +106,7 @@ export default {
 </script>
 
 <style scoped>
-/*首页的右侧固定栏，查看购物车详情*/
+/*首页的右侧固定栏，查看收藏夹详情*/
 #meg {
   position: fixed;
   right: 0px;

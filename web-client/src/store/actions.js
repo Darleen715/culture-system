@@ -97,7 +97,7 @@ export default {
     }
   },
 
-  // 请求购物车数据
+  // 请求收藏夹数据
   async reqCartsGoods({ commit }, params) {
     const result = await getCartsGoods(params);
     if (result.success_code === 200) {

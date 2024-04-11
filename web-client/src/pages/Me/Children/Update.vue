@@ -85,7 +85,7 @@
         </el-input>
       </div>
 
-      <el-button type="danger" @click="saveUserInfo()" style="margin:20px 100px 10px 250px">编辑</el-button>
+      <el-button type="danger" @click="saveUserInfo()" style="margin:20px 100px 10px 250px">提交</el-button>
     </div>
   </div>
 </template>

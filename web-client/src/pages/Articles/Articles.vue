@@ -5,7 +5,8 @@
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
           <el-button type="primary" @click="goToAddArticle">发布新文章</el-button>
-          <a class="nav-link" @click.prevent="goBack">返回商城</a>
+          <a class="nav-link" @click.prevent="goBackCom">返回社区</a>
+          <a class="nav-link" @click.prevent="goBackHome">返回商城</a>
         </li>
       </ul>
     </nav>
@@ -18,7 +19,7 @@
 <script>
 // 引入您的API
 import { getArticles } from './../../api/index'
-import {mapState} from 'vuex'
+import { mapState } from 'vuex'
 
 
 export default {
@@ -28,51 +29,18 @@ export default {
     }
   },
   computed: {
-      ...mapState(['userInfo'])
-    },
-  mounted() {
-    this.getAllArticles();  // 在组件挂载后立即调用获取文章信息的方法
+    ...mapState(['userInfo'])
   },
   methods: {
-    getAllArticles() {
-      // 使用您的API方法获取文章信息
-      getArticles()
-        .then(response => {
-          // 成功获取文章信息后将其存储到组件的articles数组中
-          this.articles = response.message.map(article => {
-            article.likes = 0; // 添加likes字段并初始化为0
-            article.liked = false; // 添加liked字段并初始化为false
-            return article;
-          });
-        })
-        .catch(error => {
-          console.error('获取文章信息时出错：', error);
-        });
-    },
-    toggleLike(index) {
-      // 切换点赞状态
-      this.articles[index].liked = !this.articles[index].liked;
-      // 更新点赞数
-      if (this.articles[index].liked) {
-        this.articles[index].likes++;
-      } else {
-        this.articles[index].likes--;
-      }
-    },
-    formatDate(date) {
-      const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
-      const formattedDate = new Date(date).toLocaleDateString('en-US', options);
-      // 将日期字符串拆分为年、月、日
-      const [month, day, year] = formattedDate.split('/');
-      // 重新拼接日期字符串，年在最前面，用短横线连接
-      return `${year}-${month}-${day}`;
-    },
     goToAddArticle() {
       this.$router.push('/articles/addarticle');
     },
-    goBack() {
+    goBackHome() {
       this.$router.replace('/home');
     },
+    goBackCom() {
+      this.$router.replace('/articles');
+    }
   }
 }
 </script>
@@ -132,5 +100,6 @@ export default {
 
 .nav-link {
   margin: 0 20px;
+  cursor: pointer;
 }
 </style>
