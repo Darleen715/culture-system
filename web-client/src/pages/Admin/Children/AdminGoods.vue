@@ -102,6 +102,9 @@ export default {
             type: 'success',
             message: '已删除'
           });
+          setTimeout(() => {
+            window.location.reload(); // 删除成功后等待两秒再刷新当前页面
+          }, 2000); // 2000毫秒等于两秒
         }
       }).catch(() => {
         this.$message({

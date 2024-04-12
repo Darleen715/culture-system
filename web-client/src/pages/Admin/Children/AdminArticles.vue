@@ -19,7 +19,7 @@
             <el-table :data="tempData" style="width: 100%">
                 <el-table-column type="expand">
                     <template slot-scope="props">
-                        <el-form label-position="left" inline class="demo-table-expand">
+                        <el-form label-position="left" inline-block class="demo-table-expand">
                             <el-form-item label="文章标题">
                                 <span>{{ props.row.title }}</span>
                             </el-form-item>
@@ -32,12 +32,14 @@
                         </el-form>
                     </template>
                 </el-table-column>
-                <el-table-column label="商品 ID" prop="article_id">
+                <el-table-column label="文章ID" prop="article_id">
+                </el-table-column>
+                <el-table-column label="作者ID" prop="author_id">
                 </el-table-column>
                 <el-table-column label="文章标题" prop="title">
                 </el-table-column>
-                <el-table-column label="标签" prop="tags">
-                </el-table-column>
+                <!-- <el-table-column label="标签" prop="tags">
+                </el-table-column> -->
                 <el-table-column label="操作">
                     <template slot-scope="props">
                         <el-button size="mini" type="danger"

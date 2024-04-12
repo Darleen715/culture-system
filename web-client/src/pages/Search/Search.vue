@@ -71,7 +71,7 @@
     },
     watch:{
       $route(){
-        this.currentCate = Number(this.$route.params.id);
+        this.currentCate = Number(this.$route.params.cate_id);
         this.activeIndex = Number(this.$route.params.pageNo);
          this.$store.dispatch('reqRecommendShopList', {
             category: this.currentCate,

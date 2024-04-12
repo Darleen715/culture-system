@@ -90,7 +90,7 @@ router.get('/api/recommendshoplist', (req, res) => {
     let pageSize = req.query.count || 3;
 
     let sqlStr = 'SELECT * FROM recommend WHERE category = ' + category + ' LIMIT ' + (pageNo - 1) * pageSize + ',' + pageSize;
-
+    console.log(sqlStr);
     conn.query(sqlStr, (error, results, fields) => {
         if (error) {
             console.log(error);
@@ -336,7 +336,7 @@ router.post('/api/login_pwd', (req, res) => {
     if (captcha !== tmp_captcha) {
         console.log('error!');
         res.json({ err_code: 0, message: '验证码不正确!' });
-        return ;
+        return;
     }
 
     tmp_captcha = '';
@@ -479,6 +479,7 @@ router.post('/api/add_shop_cart', (req, res) => {
     let counts = req.body.counts;
 
     let sql_str = "SELECT * FROM cart WHERE goods_id = " + goods_id + " AND user_id=" + user_id + " LIMIT 1";
+
     conn.query(sql_str, (error, results, fields) => {
         if (error) {
             res.json({ err_code: 0, message: '服务器内部错误!' });
@@ -487,14 +488,22 @@ router.post('/api/add_shop_cart', (req, res) => {
             if (results[0]) { // 商品已经存在
                 res.json({ success_code: 200, message: '该商品已在收藏夹中' });
             } else { // 商品不存在
-                let add_sql = "INSERT INTO cart(goods_id, goods_name, thumb_url, price, buy_count, is_pay, user_id, counts) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+                let add_sql = "INSERT INTO cart(goods_id, goods_name, thumb_url, price, buy_count, is_pay, user_id, counts) VALUES (?, ?, ?, ?, ?, ?, ?, ?) ";
                 let sql_params = [goods_id, goods_name, thumb_url, price, buy_count, is_pay, user_id, counts];
                 conn.query(add_sql, sql_params, (error, results, fields) => {
                     if (error) {
                         res.json({ err_code: 0, message: '加入收藏夹失败!' });
-                        console.log(error);
                     } else {
-                        res.json({ success_code: 200, message: '加入收藏夹成功!' });
+                        let update_str = "UPDATE cart JOIN recommend ON cart.goods_id = recommend.goods_id SET cart.region = recommend.region WHERE cart.goods_id = " + goods_id
+                        console.log(update_str);
+                        conn.query(update_str, (error, results, fields) => {
+                            if (error) {
+                                res.json({ err_code: 0, message: '更新地区失败!' });
+                            } else {
+                                res.json({ success_code: 200, message: '加入收藏夹成功!' });
+                            }
+                        })
+
                     }
                 });
             }

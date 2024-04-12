@@ -46,6 +46,13 @@ CREATE TABLE `cart` (
   `counts` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci ROW_FORMAT=DYNAMIC;
 
+UPDATE cart
+JOIN recommend ON cart.goods_id = recommend.goods_id
+SET cart.region = recommend.region;
+
+
+
+
 -- ----------------------------
 -- Records of cart
 -- ----------------------------

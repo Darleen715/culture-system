@@ -1,4 +1,5 @@
 <script>
+import { mapState } from 'vuex';
 const chinaJson = require('../../utils/china.json');
 export default {
   render: function (createElement) {
@@ -54,12 +55,45 @@ export default {
       ],
     };
   },
+  computed: {
+    ...mapState(['userInfo', 'cartgoods'])
+  },
+  mounted() {
+    this.initEchart()
+  },
   methods: {
     initEchart() {
-      let dataList = this.dataList;
-      for (let i = 0; i < dataList.length; i++) {
-        dataList[i].value = Math.ceil(Math.random() * 1000 - 1);
+      const dataList = this.dataList;
+      const regionCounts = {}; // 创建一个空对象来存储每个 region 的计数
+
+      // 遍历 cartgoods 数组
+      for (let i = 0; i < this.cartgoods.length; i++) {
+        const region = this.cartgoods[i].region;
+
+        // 如果当前 region 已经存在于 regionCounts 中，则将其计数加一；否则，初始化为 1
+        if (regionCounts.hasOwnProperty(region)) {
+          regionCounts[region]++;
+        } else {
+          regionCounts[region] = 1;
+        }
       }
+      console.log(regionCounts);
+      // 遍历 dataList 数组，设置每个 dataList[i].value 为对应的 regionCounts 中的值
+      for (let i = 0; i < dataList.length; i++) {
+        const region = dataList[i].name;
+        // 如果 region 存在于 regionCounts 中，则将 dataList[i].value 设置为 regionCounts 中对应的值，否则设置为 0
+        dataList[i].value = regionCounts[region] || 0;
+      }
+
+
+      // 计算 likeSum，即获取 regionCounts[region] 的最大值
+      let likeSum = 0;
+      for (const region in regionCounts) {
+        if (regionCounts[region] > likeSum) {
+          likeSum = regionCounts[region];
+        }
+      }
+
       const _this = this;
       var myChart = this.$echarts.init(document.getElementById("main"));
       this.$echarts.registerMap('china', chinaJson)
@@ -74,12 +108,12 @@ export default {
         },
         visualMap: {
           min: 0,
-          max: 1000,
+          max: likeSum, // 使用 likeSum 作为 max 属性的值
           left: "left",
           top: "bottom",
           text: ["高", "低"], //取值范围的文字
           inRange: {
-            color: ["#e0ffff", "blue"], //取值范围的颜色
+            color: ["#e0ffff", "#E72929"], //取值范围的颜色
           },
           show: true, //图注
         },
@@ -114,25 +148,12 @@ export default {
             name: "省份",
             type: "map",
             geoIndex: 0,
-            data: this.dataList,
+            data: dataList,
           },
         ],
       };
       myChart.setOption(option);
-      myChart.on("click", function (params) {
-        if (!params.data.ename) {
-          alert('暂无' + params.name + '地图数据');
-          return;
-        }
-        _this.$router.push({
-          path: "/province",
-          query: { provinceName: params.data.ename, province: params.name },
-        });
-      });
-    },
-  },
-  mounted() {
-    this.initEchart();
+    }
   },
 };
 </script>
