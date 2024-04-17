@@ -9,6 +9,7 @@ import svgCaptcha from 'svg-captcha'
 import md5 from 'blueimp-md5'
 import formidable from 'formidable'
 import { basename } from 'path'
+import { log } from 'console'
 
 const S_KEY = '@WaLQ1314?.LqFtK.Com.#'; // 盐
 const users = {}; // 用户信息
@@ -85,7 +86,7 @@ router.post('/api/searchgoods', (req, res) => {
  */
 router.get('/api/recommendshoplist', (req, res) => {
     // 获取参数
-    let category = req.query.category || 1
+    let category = parseInt(req.query.category) || parseInt(1)
     let pageNo = req.query.pageNo || 1;
     let pageSize = req.query.count || 3;
 
@@ -1009,5 +1010,45 @@ router.post('/api/delete_user', (req, res) => {
         }
     });
 });
+
+
+// 获取商品的 sales_tip 值
+router.get('/api/recommend/:goodsId', (req, res) => {
+    const { goodsId } = req.params;
+    let sqlStr = "SELECT sales_tip FROM recommend WHERE goods_id = ?";
+    console.log(sqlStr);
+    conn.query(sqlStr, [goodsId], (error, results, fields) => {
+        if (error) {
+            console.log(error);
+            res.status(500).json({ error: '查询商品 sales_tip 值失败' });
+        } else {
+            if (results.length === 0) {
+                res.status(404).json({ error: '商品不存在' });
+            } else {
+                res.json({ sales_tip: results[0].sales_tip });
+            }
+        }
+    });
+});
+
+// 根据 sales_tip 值获取相似的商品列表
+router.get('/api/recommend/sales_tip/:saleTip', (req, res) => {
+    const saleTip = req.params.saleTip; // 直接获取saleTip参数的值
+    console.log(saleTip);
+    let sqlStr = "SELECT * FROM recommend WHERE sales_tip = ?";
+    console.log(sqlStr);
+    conn.query(sqlStr, [saleTip], (error, results, fields) => {
+        if (error) {
+            console.log(error);
+            res.status(500).json({ error: '查询相似商品列表失败' });
+        } else {
+            res.json(results);
+        }
+    });
+});
+
+
+
+
 
 export default router;

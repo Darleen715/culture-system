@@ -110,3 +110,10 @@ export const deleteArticle = (article_id, title) => ajax(BASE_URL + '/api/delete
 
 // 删除单个用户
 export const deleteUser = (id, user_name) => ajax(BASE_URL + '/api/delete_user', { id, user_name }, 'POST')
+
+
+// 请求特定商品的 sale_tip 值
+export const getGoodsSaleTip = (goodsId) => ajax(BASE_URL + `/api/recommend/${goodsId}`);
+
+// 根据 sale_tip 值获取相似的商品列表
+export const getSimilarProductsBySaleTip = (saleTip) => ajax(BASE_URL + `/api/recommend/sales_tip/${saleTip}`);

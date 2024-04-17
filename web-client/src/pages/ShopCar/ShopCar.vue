@@ -57,24 +57,15 @@
       <div class="foot_op">
         <a class="foot_remove" @click.prevent="emptyCart">清空收藏列表</a>
       </div>
-      <!-- <div class="foot_total">
-				<div class="amout-sum">
-					<span class="txt">已选商品</span>
-					<strong id="selected_amout">{{totalAmount}}</strong>
-					<span class="txt">件</span>
-				</div>
-				<div class="price-sum">
-					<span class="txt">合计（不含运费）：</span>
-					<strong class="selected_price">{{totalPrice | moneyFormat(totalPrice)}}</strong>
-				</div>
-				<div class="btn-area">
-          
-					<a class="btn-sumbit" :class="{'btn-allow': totalAmount}" @click="moneyCount(goods)">结&nbsp;算</a>
-				</div>
-			</div> -->
+
     </div>
 
-    <!-- <img src="./../../common/img/footer.png" style="width:100% ; height:100px; margin-top:20px"> -->
+    <div class="recommend_list">
+
+      <div class="pro_show">
+        <!-- <ProductItem v-for="(pro) in this.cartgoods" :key="pro.goods_id" :pro="pro" /> -->
+      </div>
+    </div>
 
   </div>
 </template>
@@ -83,6 +74,8 @@
 import { mapState } from 'vuex';
 import { mapActions } from 'vuex'
 import { MessageBox } from 'element-ui';
+import { getGoodsSaleTip, getSimilarProductsBySaleTip } from '../../api/index'
+// import ProductItem from '../../components/ProductItem/ProductItem'
 
 export default {
   data() {
@@ -96,11 +89,13 @@ export default {
   },
   computed: {
     ...mapState(['userInfo', 'cartgoods']),
+
   },
   mounted() {
     let user_id = this.userInfo.id;
     // 请求商品数据
     this.$store.dispatch('reqCartsGoods', { user_id });
+    this.getRecommendedProducts();
   },
   methods: {
     // 1.更新单个商品数量
@@ -202,6 +197,34 @@ export default {
     goDetail(id) {
       this.$router.replace('/goods/' + id);
     },
+    // 获取用户推荐列表
+    async getRecommendedProducts() {
+      try {
+        this.recommendedProducts = []; // 初始化为一个空数组
+
+        // 遍历用户的收藏列表
+        for (const goods of this.cartgoods) {
+          const goodsId = goods.goods_id;
+
+          // 使用 goods_id 值查询 recommend 表中的 sale_tip 字段的值
+          const saleTipResponse = await getGoodsSaleTip(goodsId);
+          const saleTip = saleTipResponse.sales_tip;
+
+          // 根据 sale_tip 值查询 recommend 表中具有相同 sale_tip 值的其他商品
+          const recommendedResponse = await getSimilarProductsBySaleTip(saleTip);
+          const recommendedProducts = recommendedResponse;
+
+          // 将找到的相似商品添加到推荐列表中
+          this.recommendedProducts.push(...recommendedProducts);
+        }
+
+        console.log('Recommended products:', this.recommendedProducts);
+      } catch (error) {
+        console.error('Error fetching recommended products:', error);
+      }
+    }
+
+
 
   },
 }

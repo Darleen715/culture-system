@@ -4,7 +4,7 @@
       <router-link class="navbar-brand col-sm-3 col-md-2 mr-0" to="/home">文创商城</router-link>
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
-          <a class="nav-link" @click.prevent="goBack">返回商城</a>
+          <a class="nav-link" @click="goBack">返回商城</a>
         </li>
         <li class="nav-item text-nowrap">
           <a class="nav-link" @click="logout">退出登录</a>

@@ -80,7 +80,7 @@ export default new VueRouter({
     {
       path: '/search/:id/:pageNo',
       component: Search,
-      meta: { showHeaderTop: true, showHeaderSearch: true, keepAlive: true }
+      meta: { showHeaderTop: true, showHeaderSearch: true, keepAlive: false }
     },
     {
       path: '/goods/:id',
