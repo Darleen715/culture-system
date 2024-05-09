@@ -2,7 +2,6 @@
   <div id="shopcar">
     <div id="content">
       <div class="header">
-        <img src="./../../common/img/biaoti.png" class="header_logo" />
         <span>收藏列表</span>
       </div>
       <div class="cont_title">
@@ -61,10 +60,16 @@
     </div>
 
     <div class="recommend_list">
-
-      <div class="pro_show">
-        <!-- <ProductItem v-for="(pro) in this.cartgoods" :key="pro.goods_id" :pro="pro" /> -->
+      <div class="pro_line">
+        <img src="./img/public-icon3.png" alt="" style="height:40px;width: 30px;">
+        <h3>为你推荐</h3>
+        <img src="./img/public-icon4.png" alt="" style="height:40px;width: 30px;">
       </div>
+      <!-- 在模板中，使用 v-for 指令遍历 recommendedProducts 数组，并为每个商品创建一个 ProductItem 组件 -->
+      <div class="recommended-products">
+        <ProductItem v-for="(pro, index) in recommendedProducts" :key="index" :pro="pro" />
+      </div>
+
     </div>
 
   </div>
@@ -74,7 +79,8 @@
 import { mapState } from 'vuex';
 import { mapActions } from 'vuex'
 import { MessageBox } from 'element-ui';
-import { getGoodsSaleTip, getSimilarProductsBySaleTip } from '../../api/index'
+import ProductItem from '../../components/ProductItem/ProductItem.vue'
+import { getGoodsSaleTip, getSimilarProductsBySaleTip, getAllgoods } from '../../api/index'
 // import ProductItem from '../../components/ProductItem/ProductItem'
 
 export default {
@@ -85,11 +91,15 @@ export default {
       // totalPrice: 0,  // 商品总价
       currentDelGoods: {}, // 当前删除的商品
       totalAmount: 0,//以选商品
+      recommendedProducts: [],// 推荐商品
     }
   },
   computed: {
     ...mapState(['userInfo', 'cartgoods']),
 
+  },
+  components: {
+    ProductItem
   },
   mounted() {
     let user_id = this.userInfo.id;
@@ -201,28 +211,53 @@ export default {
     async getRecommendedProducts() {
       try {
         this.recommendedProducts = []; // 初始化为一个空数组
+        if (this.cartgoods.length > 0) {
+          // 遍历用户的收藏列表
+          for (const goods of this.cartgoods) {
+            const goodsId = goods.goods_id;
 
-        // 遍历用户的收藏列表
-        for (const goods of this.cartgoods) {
-          const goodsId = goods.goods_id;
+            // 使用 goods_id 值查询 recommend 表中的 sale_tip 字段的值
+            const saleTipResponse = await getGoodsSaleTip(goodsId);
+            const saleTip = saleTipResponse.sales_tip;
 
-          // 使用 goods_id 值查询 recommend 表中的 sale_tip 字段的值
-          const saleTipResponse = await getGoodsSaleTip(goodsId);
-          const saleTip = saleTipResponse.sales_tip;
-
-          // 根据 sale_tip 值查询 recommend 表中具有相同 sale_tip 值的其他商品
-          const recommendedResponse = await getSimilarProductsBySaleTip(saleTip);
-          const recommendedProducts = recommendedResponse;
-
-          // 将找到的相似商品添加到推荐列表中
-          this.recommendedProducts.push(...recommendedProducts);
+            // 根据 sale_tip 值查询 recommend 表中具有相同 sale_tip 值的其他商品
+            const recommendedResponse = await getSimilarProductsBySaleTip(saleTip);
+            const recommendedProducts = recommendedResponse;
+            const randomList = this.getRandomNumbers(recommendedProducts.length, 3)
+            for (let i = 0; i < 3; i++) {
+              this.recommendedProducts.push(recommendedProducts[randomList[i]]);
+            }
+          }
+        } else {
+          const response = await getAllgoods();
+          if (response.success_code == 200) {
+            let getAllgoods = response.message;
+            console.log(getAllgoods);
+            let recommendIndex = this.getRandomNumbers(getAllgoods.length, 9)
+            console.log(recommendIndex);
+            for (let i = 0; i < 9; i++) {
+              console.log(getAllgoods[recommendIndex[i]]);
+              this.recommendedProducts.push(getAllgoods[recommendIndex[i]]);
+            }
+          }
         }
-
-        console.log('Recommended products:', this.recommendedProducts);
       } catch (error) {
         console.error('Error fetching recommended products:', error);
       }
+    },
+    // 从0-n里随机选择m个数的最优算法
+    getRandomNumbers(n, m) {
+      const result = [];
+      for (let i = 0; i < m; i++) {
+        let randomNum;
+        do {
+          randomNum = Math.floor(Math.random() * n);
+        } while (result.includes(randomNum));
+        result.push(randomNum);
+      }
+      return result;
     }
+
 
 
 
@@ -233,7 +268,7 @@ export default {
 <style scoped>
 #content>.header {
   width: 100%;
-  left: 130px;
+  padding-left: 130px;
   height: 90px;
   margin-top: 10px;
   position: relative;
@@ -468,5 +503,44 @@ export default {
 .btn-area>.btn-sumbit.btn-allow {
   background: #f22d00;
   cursor: pointer;
+}
+
+.recommend_list {
+  margin: 50px auto;
+  width: 100%;
+  height: auto;
+  padding-bottom: 50px;
+}
+
+.pro_line {
+  width: 100%;
+  height: 50px;
+  text-align: center;
+  line-height: 50px;
+  font-size: 26px;
+  font-family: sans-serif;
+  font-weight: normal;
+  color: #222;
+  margin-bottom: 20px;
+}
+
+.pro_line>h3 {
+  display: inline-block;
+  height: 40px;
+  line-height: 40px;
+}
+
+.pro_line>div {
+  display: inline-block;
+  margin-left: 15px;
+  cursor: pointer;
+}
+
+
+.recommended-products {
+  margin: 0 auto;
+  padding-left: 20px;
+  width: 980px;
+  min-height: 480px;
 }
 </style>

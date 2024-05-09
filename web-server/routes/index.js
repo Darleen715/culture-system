@@ -18,7 +18,7 @@ let tmp_captcha = '';
 /* GET home page. */
 router.get('/', (req, res, next) => {
     console.log(md5(md5("admin") + S_KEY))
-    res.render('index', { title: '医药商城' });
+    res.render('index', { title: '文创推广系统' });
 });
 
 /**************************************** 前台商城 ****************************************** */
