@@ -11,10 +11,10 @@
         <span>手机</span>
         <span>{{ userInfo.user_phone || '暂无' }}</span>
       </div>
-      <div class="user-item">
+      <!-- <div class="user-item">
         <span>账号</span>
         <span>{{ userInfo.user_name || '暂无' }}</span>
-      </div>
+      </div> -->
       <div class="user-item">
         <span>昵称</span>
         <span>{{ userInfo.user_nickname || '暂无' }}</span>

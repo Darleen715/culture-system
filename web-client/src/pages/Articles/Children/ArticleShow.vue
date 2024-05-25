@@ -24,6 +24,8 @@
 <script>
 // 引入您的API
 import { getArticles, addArticleLikes } from './../../../api/index'
+import { mapState } from 'vuex'
+
 
 export default {
     data() {
@@ -33,6 +35,9 @@ export default {
     },
     mounted() {
         this.getAllArticles();  // 在组件挂载后立即调用获取文章信息的方法
+    },
+    computed: {
+        ...mapState(['userInfo'])
     },
     methods: {
         getAllArticles() {
@@ -58,6 +63,7 @@ export default {
         async toggleLike(article_id, likes, index) {
             try {
                 // 检查本地存储是否存在点赞记录
+                console.log(this.userInfo);
                 const likedArticles = JSON.parse(localStorage.getItem('likedArticles')) || [];
                 // 如果用户已经点赞过该文章，则不执行点赞操作
                 if (likedArticles.includes(article_id)) {

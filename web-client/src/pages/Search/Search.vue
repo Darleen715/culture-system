@@ -72,8 +72,8 @@ export default {
 			pageNo: this.activeIndex,
 			count: this.pageSize
 		});
-		console.log(this.categoryList);
-		this.$store.dispatch('getUserInfo');
+		// console.log(this.categoryList);
+		// this.$store.dispatch('getUserInfo');
 	},
 	watch: {
 		watch: {

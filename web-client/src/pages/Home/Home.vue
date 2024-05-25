@@ -97,6 +97,9 @@ export default {
 				this.$store.dispatch('reqHomeShopList');
 			});
 		},
+		$route() {
+			window.location.reload()
+		}
 	}
 }
 </script>

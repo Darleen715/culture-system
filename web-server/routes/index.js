@@ -257,7 +257,7 @@ router.post('/api/login_code', (req, res) => {
 
     // 验证验证码是否正确
     if (users[phone] !== code) {
-        res.json({ err_code: 0, message: '验证码不正确!' });
+        return res.json({ err_code: 0, message: '验证码不正确!' });
     }
 
     // 查询数据
@@ -269,6 +269,7 @@ router.post('/api/login_code', (req, res) => {
         if (error) {
             res.json({ err_code: 0, message: '查询失败' });
             console.log(error);
+            return;
         } else {
             results = JSON.parse(JSON.stringify(results));
             if (results[0]) {  // 用户已经存在
@@ -289,33 +290,7 @@ router.post('/api/login_code', (req, res) => {
                     }
                 });
             } else { // 新用户
-                const addSql = "INSERT INTO user_info(user_name, user_phone, user_avatar) VALUES (?, ?, ?)";
-                const addSqlParams = [phone, phone, 'http://localhost:' + config.port + '/avatar_uploads/avatar_default.jpg'];  // 手机验证码注册，默认用手机号充当用户名
-                conn.query(addSql, addSqlParams, (error, results, fields) => {
-                    results = JSON.parse(JSON.stringify(results));
-                    if (!error) {
-                        req.session.userId = results.insertId;
-                        let sqlStr = "SELECT * FROM user_info WHERE id = '" + results.insertId + "' LIMIT 1";
-                        conn.query(sqlStr, (error, results, fields) => {
-                            if (error) {
-                                res.json({ err_code: 0, message: '注册失败' });
-                                console.log(error);
-                            } else {
-                                results = JSON.parse(JSON.stringify(results));
-
-                                res.json({
-                                    success_code: 200,
-                                    message: {
-                                        id: results[0].id,
-                                        user_name: results[0].user_name,
-                                        user_phone: results[0].user_phone,
-                                        user_avatar: results[0].user_avatar
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+                return res.json({ err_code: 0, message: '该手机号未注册' });
             }
         }
     });
@@ -346,14 +321,14 @@ router.post('/api/login_pwd', (req, res) => {
     let sqlStr = "SELECT * FROM user_info WHERE user_name = '" + user_name + "' LIMIT 1";
     conn.query(sqlStr, (error, results, fields) => {
         if (error) {
-            res.json({ err_code: 0, message: '用户名不正确!' });
+            return res.json({ err_code: 0, message: '用户名不正确!' });
         } else {
             results = JSON.parse(JSON.stringify(results));
             console.log(results[0]);
             if (results[0]) {  // 用户已经存在
                 // 验证密码是否正确
                 if (results[0].user_pwd !== user_pwd) {
-                    res.json({ err_code: 0, message: '密码不正确!' });
+                    return res.json({ err_code: 0, message: '密码不正确!' });
                 } else {
                     req.session.userId = results[0].id;
 
@@ -373,9 +348,45 @@ router.post('/api/login_pwd', (req, res) => {
                         info: '登录成功!'
                     });
                 }
+            } else {
+                return res.json({ err_code: 0, message: '该手机号未注册' });
+            }
+        }
+    });
+});
+
+
+/**
+  手机验证码注册
+*/
+router.post('/api/register_code', (req, res) => {
+    // 获取数据
+    const phone = req.body.phone;
+    const code = req.body.code;
+
+    // 验证验证码是否正确
+    if (users[phone] !== code) {
+        return res.json({ err_code: 0, message: '验证码不正确!' });
+    }
+
+    // 查询数据
+    delete users[phone];
+
+    let sqlStr = "SELECT * FROM user_info WHERE user_phone = '" + phone + "' LIMIT 1";
+
+    conn.query(sqlStr, (error, results, fields) => {
+        if (error) {
+            res.json({ err_code: 0, message: '查询失败' });
+            console.log(error);
+            return;
+        } else {
+            results = JSON.parse(JSON.stringify(results));
+            if (results[0]) {  // 用户已经存在
+                res.json({ err_code: 0, message: '手机号已被注册' });
+                return;
             } else { // 新用户
-                const addSql = "INSERT INTO user_info(user_name, user_pwd, user_avatar) VALUES (?, ?, ?)";
-                const addSqlParams = [user_name, user_pwd, 'http://localhost:' + config.port + '/avatar_uploads/avatar_default.jpg'];
+                const addSql = "INSERT INTO user_info(user_phone, user_name, user_avatar) VALUES (?, ?, ?)";
+                const addSqlParams = [phone, phone, 'http://localhost:' + config.port + '/avatar_uploads/avatar_default.jpg'];
                 conn.query(addSql, addSqlParams, (error, results, fields) => {
                     results = JSON.parse(JSON.stringify(results));
                     if (!error) {
@@ -383,7 +394,7 @@ router.post('/api/login_pwd', (req, res) => {
                         let sqlStr = "SELECT * FROM user_info WHERE id = '" + results.insertId + "' LIMIT 1";
                         conn.query(sqlStr, (error, results, fields) => {
                             if (error) {
-                                res.json({ err_code: 0, message: '注册失败' });
+                                return res.json({ err_code: 0, message: '注册失败' });
                             } else {
                                 results = JSON.parse(JSON.stringify(results));
 
@@ -391,9 +402,9 @@ router.post('/api/login_pwd', (req, res) => {
                                     success_code: 200,
                                     message: {
                                         id: results[0].id,
-                                        user_name: results[0].user_name || '',
-                                        user_nickname: results[0].user_nickname || '',
-                                        user_avatar: results[0].user_avatar || ''
+                                        user_name: results[0].user_name,
+                                        user_phone: results[0].user_phone,
+                                        user_avatar: results[0].user_avatar
                                     }
                                 });
                             }
@@ -404,6 +415,63 @@ router.post('/api/login_pwd', (req, res) => {
         }
     });
 });
+
+/**
+ * 用户名和密码注册
+ */
+router.post('/api/register_pwd', (req, res) => {
+    // 获取数据
+    const user_name = req.body.name;
+    const user_pwd = md5(md5(req.body.pwd) + S_KEY);
+    const captcha = req.body.captcha.toLowerCase();
+
+    // 验证图形验证码是否正确
+    if (captcha !== tmp_captcha) {
+        console.log('error!');
+        res.json({ err_code: 0, message: '验证码不正确!' });
+        tmp_captcha = ''; // 移除验证码值
+        return; // 结束函数
+    }
+
+    // 查询数据
+    let sqlStr = "SELECT * FROM user_info WHERE user_phone = '" + user_name + "' LIMIT 1";
+    conn.query(sqlStr, (error, results, fields) => {
+        if (error) {
+            return res.json({ err_code: 0, message: '用户名不正确!' });
+        } else {
+            results = JSON.parse(JSON.stringify(results));
+            console.log(results[0]);
+            if (results[0]) {  // 用户已经存在 
+                res.json({ err_code: 0, message: '手机号已被注册' });
+            } else {
+                // 新用户
+                const addSql = "INSERT INTO user_info(user_name, user_pwd, user_phone, user_avatar) VALUES (?, ?, ?, ?)"; // 修正 SQL 语句
+                const addSqlParams = [user_name, user_pwd, user_name, 'http://localhost:' + config.port + '/avatar_uploads/avatar_default.jpg'];  // 手机验证码注册，默认用手机号充当用户名
+                conn.query(addSql, addSqlParams, (error, results, fields) => {
+                    if (error) {
+                        console.log(error);
+                        return res.json({ err_code: 0, message: '注册失败' });
+                    } else {
+                        results = JSON.parse(JSON.stringify(results));
+                        console.log(results);
+                        req.session.userId = results.insertId;
+                        res.json({ // 发送注册成功响应并结束函数
+                            success_code: 200,
+                            message: {
+                                id: results.insertId,
+                                user_name: user_name, // 使用传入的用户名
+                                user_phone: user_name, // 使用传入的用户名作为手机号
+                                user_avatar: 'http://localhost:' + config.port + '/avatar_uploads/avatar_default.jpg'
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    });
+});
+
+
 
 /**
 *  根据session中的用户id获取用户信息
@@ -641,7 +709,7 @@ router.post('/api/change_user_phone', (req, res) => {
 
     // 验证验证码是否正确
     if (users[phone] !== code) {
-        res.json({ err_code: 0, message: '验证码不正确!' });
+        return res.json({ err_code: 0, message: '验证码不正确!' });
     }
 
     // 查询数据
@@ -651,10 +719,10 @@ router.post('/api/change_user_phone', (req, res) => {
 
     conn.query(sqlStr, (error, results, fields) => {
         if (error) {
-            res.json({ err_code: 0, message: '修改失败' });
+            return res.json({ err_code: 0, message: '修改失败' });
             console.log(error);
         } else {
-            res.json({ success_code: 200, message: '修改成功' });
+            return res.json({ success_code: 200, message: '修改成功' });
         }
     });
 

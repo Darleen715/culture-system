@@ -161,6 +161,7 @@ export default {
         this.currentDelGoods = goods;
         this.$store.dispatch('delSingleGoods', { goods, user_id });
         this.getAllGoodsPrice();
+        location.reload(); // 重新加载当前页面
       }).catch(() => {
         this.$message({
           type: 'info',
@@ -178,6 +179,7 @@ export default {
         let user_id = this.userInfo.id;
         this.$store.dispatch('delAllGoods', { user_id });
         this.getAllGoodsPrice();
+        location.reload(); // 重新加载当前页面
       }).catch(() => {
         this.$message({
           type: 'info',

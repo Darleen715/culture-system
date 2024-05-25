@@ -134,6 +134,7 @@ export default {
         });
         return;
       }
+      console.log('商品详情页', this.userInfo);
       let result = await postComment(this.goodsDetail[0].goods_id, this.textarea, this.rating, this.userInfo.id);
       if (result.success_code === 200) {
         MessageBox({
@@ -160,7 +161,9 @@ export default {
     async dealWithCellBtnClick(goods) {
       // 1. 发送请求
       // user_id, goods_id, goods_name, thumb_url, price, buy_count, counts
+      console.log('商品详情页', '改变收藏夹');
       if (this.userInfo.user_name) {
+        console.log(this.userInfo.user_name);
         let result = await addGoodsToCart(this.userInfo.id, goods.goods_id, goods.short_name, goods.thumb_url, goods.price, this.shopNum, goods.counts);
         if (result.success_code === 200) {
           MessageBox({
@@ -174,6 +177,7 @@ export default {
           this.shopNum = 1;
         }
       }
+      console.log('商品详情页', '结束改变');
     }
   },
 }

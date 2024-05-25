@@ -39,6 +39,12 @@ export const phoneCodeLogin = (phone, code) => ajax(BASE_URL + '/api/login_code'
 // 用户名和密码登录
 export const pwdLogin = (name, pwd, captcha) => ajax(BASE_URL + '/api/login_pwd', { name, pwd, captcha }, 'POST');
 
+// 手机验证码注册
+export const phoneCodeRegister = (phone, code) => ajax(BASE_URL + '/api/register_code', { phone, code }, 'POST');
+
+// 用户名和密码注册
+export const pwdCodeRegister = (name, pwd, captcha) => ajax(BASE_URL + '/api/register_pwd', { name, pwd, captcha }, 'POST');
+
 // 获取登录的用户信息
 export const getUserInfo = (params) => ajax(BASE_URL + '/api/user_info', params);
 

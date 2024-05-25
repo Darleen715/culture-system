@@ -21,10 +21,10 @@
         <span>手机</span>
         <span>{{ userInfo.user_phone || "暂未设置" }}</span>
       </div>
-      <div class="user-item">
+      <!-- <div class="user-item">
         <span>账号</span>
         <span>{{ userInfo.user_name || "暂未设置" }}</span>
-      </div>
+      </div> -->
       <div class="user-item">
         <span>昵称</span>
         <el-input

@@ -65,7 +65,8 @@
           </div>
           <button class="login-submit" @click.prevent="login()">登录</button>
         </form>
-        <button class="login-back" @click="$router.back()">返回</button>
+        <button class="login-back" @click="$router.back()">返回主页</button>
+        <button class="go-register" @click="$router.replace('/register')">新用户注册</button>
       </div>
     </div>
   </div>
@@ -159,7 +160,8 @@ export default {
           MessageBox({
             type: 'info',
             message: "请输入正确手机号码!",
-            showClose: true,
+            showClose: true
+
           });
           return;
         }
@@ -175,13 +177,14 @@ export default {
           MessageBox({
             type: 'info',
             message: "请输入正确的验证码!",
-            showClose: true,
+            showClose: true
           });
           return;
         }
         // 5.3 手机验证码登录
         const result = await phoneCodeLogin(this.phone, this.code);
         if (result.success_code === 200) {
+          console.log(result.message);
           this.userInfo = result.message;
           this.phone = ''; // 手机号码
           this.countDown = 0; // 倒计时
@@ -191,9 +194,12 @@ export default {
           this.user_name = ''; // 用户名
           this.captcha = '';  // 图形验证码
         } else {
-          this.userInfo = {
-            message: '登录失败, 手机号或验证码不正确!'
-          };
+          MessageBox({
+            type: 'info',
+            message: `${result.message}`,
+            showClose: true,
+          });
+          return;
         }
       } else { // 账号和密码登录
         // 5.4 前端校验
@@ -224,6 +230,7 @@ export default {
         const result = await pwdLogin(this.user_name, this.pwd, this.captcha);
         if (result.success_code === 200) {
           console.log('success');
+          console.log(result.message);
           this.userInfo = result.message;
           this.phone = ''; // 手机号码
           this.countDown = 0; // 倒计时
@@ -232,32 +239,26 @@ export default {
           this.pwd = ''; // 密码
           this.user_name = ''; // 账号
           this.captcha = '';  // 图形验证码
-          return;
         } else {
+          console.log('密码登录错误', result);
           MessageBox({
             type: 'info',
             message: `${result.message}`,
             showClose: true,
-
           });
-          return;
         }
       }
 
+      let messageBoxResult
       // 6. 后续处理
       if (!this.userInfo.id) { // 失败
-        MessageBox({
-          type: 'info',
-          message: this.userInfo.message,
-          showClose: true,
-        });
       } else { // 成功
         // 6.1 同步用户数据
         this.syncUserInfo(this.userInfo);
         // 6.2 回到主界面
-        MessageBox({
+        messageBoxResult = await MessageBox({
           type: 'success',
-          message: '登录成功!',
+          message: `登录成功! 欢迎${this.userInfo.user_name}`,
           showClose: true,
         });
         this.$router.back();
@@ -378,4 +379,17 @@ export default {
           text-align center
           font-size 16px
           line-height 42px
+        .go-register
+          display block
+          width 100%
+          height 42px
+          margin-top 30px
+          border-radius 4px
+          background #9370db
+          color #fff
+          text-align center
+          font-size 16px
+          line-height 42px
+          border 0
+
 </style>

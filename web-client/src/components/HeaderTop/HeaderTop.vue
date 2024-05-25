@@ -2,23 +2,17 @@
   <div class="header_nav">
     <div>
       <p>嗨~欢迎来到文创推广系统</p>
-
     </div>
     <ul>
       <li v-if="!userInfo.id">
-        <router-link to="/login">登录</router-link><router-link to="/login">免费注册</router-link>
+        <router-link to="/login">登录</router-link><router-link to="/register">免费注册</router-link>
       </li>
       <li v-else>
         <a v-if="userInfo.user_nickname">您好,{{ userInfo.user_nickname }}</a>
         <a v-else>您好,{{ userInfo.user_name | nameFormat }}</a>
         <a @click="headerLogout">退出登录</a>
       </li>
-      <li v-if="this.$route.path.indexOf('/home') === -1"><router-link to="/home">返回首页</router-link></li>
-      <!-- <li><a @click.prevent="goArticle">文创社区</a></li>
-      <li><a @click.prevent="goMe">个人中心</a></li>
-      <li><a @click.prevent="goMap">我的地图</a></li>
-      <li><a @click.prevent="goShopCar">我的收藏</a></li>
-      <li><a @click.prevent="goAdmin">管理员通道</a></li> -->
+      <li v-if="!isHome"><a @click="goHome">返回首页</a></li>
       <li><a @click="goArticle">文创社区</a></li>
       <li><a @click="goMe">个人中心</a></li>
       <li><a @click="goMap">我的地图</a></li>
@@ -30,82 +24,61 @@
 
 <script>
 import { mapState } from 'vuex';
-import { mapActions } from 'vuex'
+import { mapActions } from 'vuex';
 import { MessageBox } from 'element-ui';
-// 引入三级联动的城市数据
-import options from '@/config/area.js'
 
 export default {
-  data() {
-    return {
-
-    }
-  },
-  mounted() {
-    this.getLocation();
-  },
   computed: {
-    ...mapState(["userInfo"])
+    ...mapState(["userInfo"]),
+    isHome() {
+      return this.$route.path === '/home';
+    }
   },
   methods: {
     ...mapActions(["logOut"]),
 
-    handleAreaChange(value) {
-      //console.log(this.selectedOptions);
-    },
-
-    headerLogout() {
-      this.$confirm('您确定退出登录吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
+    async headerLogout() {
+      try {
+        await this.$confirm('您确定退出登录吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        });
+        await this.logOut({});
+        window.localStorage.removeItem("userInfo");
         this.$message({
           type: 'success',
           message: '退出成功!'
         });
-        let result = this.logOut({});
-        window.localStorage.removeItem("userInfo");
-      }).catch(() => {
+        this.$router.replace('/home');
+      } catch (error) {
         this.$message({
           type: 'info',
           message: '已取消退出'
         });
-      });
+      }
+    },
+    goHome() {
+      this.$router.replace('/home');
     },
     goMe() {
-      if (this.userInfo.id) {
-        this.$router.replace('/me');
-      } else {
-        MessageBox({
-          type: 'info',
-          message: "请先登录!",
-          showClose: true,
-        });
-      }
+      this.navigateTo('/me');
     },
     goAdmin() {
-      let result = window.localStorage.getItem("adminInfo");
-      if (result) {
-        this.$router.replace('/admin');
-      } else {
-        this.$router.replace('/adminlogin');
-      }
+      this.$router.replace('/admin');
     },
     goShopCar() {
-      if (this.userInfo.id) {
-        this.$router.replace('/shopcar');
-      } else {
-        MessageBox({
-          type: 'info',
-          message: "请先登录!",
-          showClose: true,
-        });
-      }
+      this.navigateTo('/shopcar');
     },
     goMap() {
+      this.navigateTo('/china');
+    },
+    goArticle() {
+      this.navigateTo('/articles');
+    },
+    navigateTo(route) {
       if (this.userInfo.id) {
-        this.$router.replace('/china');
+        this.$router.replace(route);
       } else {
         MessageBox({
           type: 'info',
@@ -113,13 +86,11 @@ export default {
           showClose: true,
         });
       }
-    },
-    goArticle() {
-      this.$router.replace('/articles');
     }
-  },
+  }
 }
 </script>
+
 
 <style scoped>
 /*头部导航*/

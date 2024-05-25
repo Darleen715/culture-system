@@ -4,6 +4,7 @@ import VueRouter from 'vue-router'
 
 const Home = () => import('./../pages/Home/Home');
 const Login = () => import('./../pages/Login/Login');
+const Register = () => import('./../pages/Login/Register');
 const Search = () => import('./../pages/Search/Search');
 const Goods = () => import('./../pages/Goods/Goods');
 const Me = () => import('./../pages/Me/Me');
@@ -46,7 +47,12 @@ export default new VueRouter({
     {
       path: '/home',
       component: Home,
-      meta: { showHeaderTop: true, showHeaderSearch: true, keepAlive: true }
+      meta: { showHeaderTop: true, showHeaderSearch: true, keepAlive: true },
+      // beforeRouteEnter: (to, from, next) => {
+      //   // 每次进入Home页面之前都执行页面刷新逻辑
+      //   window.location.reload();
+      //   next();
+      // }
     },
     {
       path: '/login',
@@ -54,9 +60,14 @@ export default new VueRouter({
       meta: { keepAlive: true }
     },
     {
+      path: '/register',
+      component: Register,
+      meta: { keepAlive: true }
+    },
+    {
       path: '/china',
       component: China,
-      meta: { showHeaderTop: true, keepAlive: false }
+      meta: { showHeaderTop: true, keepAlive: true }
     },
     {
       path: '/province',
